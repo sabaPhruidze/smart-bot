@@ -1,8 +1,11 @@
-import { MessageCircle } from "lucide-react";
+interface LauncherProps {
+  onClick: () => void;
+}
 
-const Launcher = () => {
+const Launcher = ({ onClick }: LauncherProps) => {
   return (
     <button
+      onClick={onClick}
       aria-label="Open chat"
       className="
         flex h-24 w-24 items-center justify-center 
