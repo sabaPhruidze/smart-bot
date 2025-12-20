@@ -4,6 +4,7 @@ import Launcher from "./Launcher";
 import Window from "./Window";
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
     <div
       className={`fixed z-50 flex flex-col
