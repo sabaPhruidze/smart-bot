@@ -18,7 +18,7 @@ const Window = ({ onClose }: WindowProps) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       text: text,
-      sender: "user",
+      sender: "bot",
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, newMessage]);
@@ -51,7 +51,7 @@ const Window = ({ onClose }: WindowProps) => {
                 )}
 
                 <div
-                  className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm ${
+                  className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm break-words whitespace-pre-wrap ${
                     msg.sender === "user"
                       ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
                       : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
@@ -60,7 +60,6 @@ const Window = ({ onClose }: WindowProps) => {
                   {msg.text}
                 </div>
 
-                {/* მარჯვენა მხარე - იუზერის აიკონი */}
                 {msg.sender === "user" && (
                   <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 border border-blue-200">
                     <User size={20} className="text-blue-600" />
