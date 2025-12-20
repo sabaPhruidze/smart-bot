@@ -1,5 +1,5 @@
 import Header from "./Header";
-
+import InputArea from "./InputArea";
 interface WindowProps {
   onClose: () => void;
 }
@@ -12,6 +12,7 @@ const Window = ({ onClose }: WindowProps) => {
           How can I help?
         </h2>
       </div>
+      <InputArea />
     </div>
   );
 };
