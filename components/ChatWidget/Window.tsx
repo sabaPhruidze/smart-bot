@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "./Header";
 import InputArea from "./InputArea";
+import { User } from "lucide-react";
 
 interface WindowProps {
   onClose: () => void;
@@ -25,23 +26,46 @@ const Window = ({ onClose }: WindowProps) => {
   return (
     <div className="bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-[400px] sm:h-[600px] sm:rounded-2xl sm:border sm:border-gray-100">
       <Header onClose={onClose} />
-      <div className="flex-1 bg-white p-6">
+      <div className="flex-1 bg-white p-6 overflow-y-auto">
         {messages.length === 0 ? (
           <h2 className="text-2xl font-light text-center text-gray-800 mt-8">
             How can I help?
           </h2>
         ) : (
-          <div className="flex flex-col space-y-4">
-            {messages.map((msg: Message) => (
+          <div className="flex flex-col space-y-6">
+            {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`p-3 rounded-lg max-w-[80%] text-sm ${
-                  msg.sender === "user"
-                    ? "bg-blue-100 text-blue-900 self-end rounded-br-none"
-                    : "bg-gray-100 text-gray-800 self-start rounded-bl-none"
+                className={`flex items-end gap-2 ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                {msg.text}
+                {msg.sender === "bot" && (
+                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ">
+                    <img
+                      src="/icon.png"
+                      alt="Bot"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div
+                  className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm ${
+                    msg.sender === "user"
+                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
+                      : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+
+                {/* მარჯვენა მხარე - იუზერის აიკონი */}
+                {msg.sender === "user" && (
+                  <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 border border-blue-200">
+                    <User size={20} className="text-blue-600" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
