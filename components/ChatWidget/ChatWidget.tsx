@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Launcher from "./Launcher";
 import Window from "./Window";
 import Login from "./Login/Login";
@@ -23,7 +23,14 @@ const ChatWidget = () => {
 
   const handleClose = () => setMode("closed");
 
-  const handleLoginSuccess = () => {
+  useEffect(() => {
+    const flag = localStorage.getItem("chat_authed");
+    if (flag === "1") setIsAuthed(true);
+  }, []);
+  const handleLoginSuccess = (user: { id: string; displayName: string }) => {
+    localStorage.setItem("chat_authed", "1");
+    localStorage.setItem("chat_user", JSON.stringify(user));
+
     setIsAuthed(true);
     setMode("chat");
   };

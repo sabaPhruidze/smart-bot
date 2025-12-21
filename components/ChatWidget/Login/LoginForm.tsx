@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormValues } from "./loginSchema";
 
 type LoginFormProps = {
-  onSuccess: () => void;
+  onSuccess: (user: { id: string; displayName: string }) => void;
 };
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
@@ -17,10 +17,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const {
     register,
     handleSubmit,
+    setValue, // for identifier
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-  });
+  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
@@ -28,7 +27,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     try {
       const res = await axios.post("/api/auth/login", data);
 
-      if (res.data?.ok) return onSuccess();
+      if (res.data?.ok && res.data?.user) {
+        return onSuccess(res.data.user);
+      }
 
       setServerError(
         res.data?.error ||
@@ -41,6 +42,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       );
     }
   };
+  const [idMode, setIdMode] = useState<"unknown" | "phone" | "email">(
+    "unknown"
+  );
+  const identifierReg = register("identifier");
+  const formatUSPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 10); // max 10 digits
+    const a = digits.slice(0, 3);
+    const b = digits.slice(3, 6);
+    const c = digits.slice(6, 10);
+
+    if (digits.length <= 3) return a;
+    if (digits.length <= 6) return `${a}-${b}`;
+    return `${a}-${b}-${c}`;
+  };
 
   return (
     <form
@@ -52,8 +67,37 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
           type="text"
           placeholder="Email or phone (444-444-4444)"
           autoComplete="username"
-          className="w-full border rounded px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800"
-          {...register("identifier")}
+          className="w-full py-3.5 px-5 text-md text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all"
+          {...identifierReg}
+          onChange={(e) => {
+            // 1) ჯერ RHF-ს მივაწოდოთ event
+            identifierReg.onChange(e);
+            const raw = e.target.value;
+            // თუ მთლიანად წაიშალა — reset რეჟიმი
+            if (raw.trim() === "") {
+              setIdMode("unknown");
+              return;
+            }
+            const firstChar = raw.trim()[0];
+            const firstIsDigit = !!firstChar && /\d/.test(firstChar);
+            // effectiveMode: ერთხელ თუ phone გახდა, მერე აღარ გადავდივართ email-ზე (სანამ არ წაიშლება)
+            const effectiveMode =
+              idMode === "unknown"
+                ? firstIsDigit
+                  ? "phone"
+                  : "email"
+                : idMode;
+            if (idMode === "unknown") setIdMode(effectiveMode);
+            // phone mode — forced formatting + max length
+            if (effectiveMode === "phone") {
+              const formatted = formatUSPhone(raw);
+              // setValue ძალით ჩაწერს სწორ ფორმატს და ზედმეტს ვერ შეიყვანს
+              setValue("identifier", formatted, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }
+          }}
         />
         {errors.identifier && (
           <p className="text-red-600 text-xs">
@@ -67,7 +111,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
           type="password"
           placeholder="Password"
           autoComplete="current-password"
-          className="w-full border rounded px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800"
+          className="w-full py-3.5 px-5 text-md text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all"
           {...register("password")}
         />
         {errors.password && (

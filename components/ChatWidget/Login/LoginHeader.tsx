@@ -18,7 +18,7 @@ const LoginHeader = ({ onClose }: LoginheaderProps) => {
         </div>
       </div>
       {/* center */}
-      <div className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-gray-80">
+      <div className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-gray-800">
         Sign in
       </div>
       {/* right */}

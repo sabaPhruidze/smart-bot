@@ -5,7 +5,7 @@ import LoginForm from "./LoginForm";
 
 type LoginProps = {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (user: { id: string; displayName: string }) => void;
 };
 
 export default function Login({ onClose, onSuccess }: LoginProps) {
