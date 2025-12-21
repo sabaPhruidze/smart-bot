@@ -18,7 +18,7 @@ const Window = ({ onClose }: WindowProps) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       text: text,
-      sender: "bot",
+      sender: "user",
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, newMessage]);

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Launcher from "./Launcher";
 import Window from "./Window";
+
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
