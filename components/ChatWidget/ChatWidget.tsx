@@ -1,25 +1,48 @@
 "use client";
+
 import { useState } from "react";
 import Launcher from "./Launcher";
 import Window from "./Window";
+import Login from "./Login/Login";
+
+type Mode = "closed" | "login" | "chat";
 
 const ChatWidget = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [mode, setMode] = useState<Mode>("closed");
+  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+
+  const isOpen = mode !== "closed";
+
+  const handleLauncherClick = () => {
+    if (isAuthed) {
+      setMode("chat");
+    } else {
+      setMode("login");
+    }
+  };
+
+  const handleClose = () => setMode("closed");
+
+  const handleLoginSuccess = () => {
+    setIsAuthed(true);
+    setMode("chat");
+  };
 
   return (
     <div
-      className={`fixed z-50 flex flex-col
-        ${
-          isOpen
-            ? "inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:items-end"
-            : "bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 items-center sm:items-end"
-        }`}
+      className={`fixed z-50 flex flex-col ${
+        isOpen
+          ? "inset-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:items-end"
+          : "bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 items-center sm:items-end"
+      }`}
     >
-      {isOpen ? (
-        <Window onClose={() => setIsOpen(false)} />
-      ) : (
-        <Launcher onClick={() => setIsOpen(true)} />
+      {mode === "closed" && <Launcher onClick={handleLauncherClick} />}
+
+      {mode === "login" && (
+        <Login onClose={handleClose} onSuccess={handleLoginSuccess} />
       )}
+
+      {mode === "chat" && <Window onClose={handleClose} />}
     </div>
   );
 };
