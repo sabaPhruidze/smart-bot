@@ -16,13 +16,13 @@ const Drawer = ({ open, onClose, children }: DrawerProps) => {
             type="button"
             aria-label="Close drawer overlay"
             onClick={onClose}
-            className="fixe inset-0 z-40 bg-black/30 cursor-pointer"
+            className="fixed inset-0 z-40 bg-black/30 cursor-pointer sm:absolute"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           />
           <motion.aside
-            className="fixed left-0 top-0 z-50 h-dvh w-70 bg-[#F9FAFB] border-r border-gray-200 shadow-xl"
+            className="fixed left-0 top-0 z-50 h-dvh w-70 bg-[#F9FAFB] border-r border-gray-200 shadow-xl sm:absolute sm:h-full"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}

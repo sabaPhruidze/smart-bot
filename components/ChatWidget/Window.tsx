@@ -26,7 +26,7 @@ const Window = ({ onClose }: WindowProps) => {
     setMessages((prev) => [...prev, newMessage]);
   };
   return (
-    <div className="bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-[400px] sm:h-[600px] sm:rounded-2xl sm:border sm:border-gray-100">
+    <div className="relative bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-[400px] sm:h-[600px] sm:rounded-2xl sm:border sm:border-gray-100">
       <Header
         onClose={onClose}
         onToggleDrawer={() => setDrawerOpen((p) => !p)}
