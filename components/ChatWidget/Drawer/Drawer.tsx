@@ -1,5 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion"; //animatePresence for closing
+import { X } from "lucide-react";
 
 type DrawerProps = {
   open: boolean;
@@ -28,9 +29,19 @@ const Drawer = ({ open, onClose, children }: DrawerProps) => {
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.2 }}
           >
-            <div className="p-4 border-b border-gray-200 text-sm font-semibold text-gray-800">
-              Resents
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="text-sm font-semibold text-gray-800">Recents</div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close drawer"
+                className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
             </div>
+
             <div className="p-3">{children}</div>
           </motion.aside>
         </>
