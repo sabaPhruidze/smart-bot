@@ -2,14 +2,18 @@ import { Menu, Plus, ChevronDown } from "lucide-react";
 
 interface HeaderProps {
   onClose?: () => void;
+  onToggleDrawer?: () => void;
 }
 
-const Header = ({ onClose }: HeaderProps) => {
+const Header = ({ onClose, onToggleDrawer }: HeaderProps) => {
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-[#F9FAFB] rounded-t-2xl border-b border-gray-100">
       {/* left part */}
       <div className="flex items-center gap-1">
-        <button className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer">
+        <button
+          onClick={onToggleDrawer}
+          className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
+        >
           <Menu size={20} />
         </button>
         <button className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer">
