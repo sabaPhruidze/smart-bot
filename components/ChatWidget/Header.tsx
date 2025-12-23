@@ -27,13 +27,8 @@ const Header = ({ onClose, onToggleDrawer, onNewChat }: HeaderProps) => {
         </button>
       </div>
       {/* middle part */}
-      <div className="flex items-center bg-gray-200/60 p-1 rounded-full">
-        <button className="px-3 py-1.5 text-xs font-semibold text-gray-800 bg-white rounded-full shadow-sm transition-all cursor-pointer">
-          Project Help
-        </button>
-        <button className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
-          Customize
-        </button>
+      <div className="flex items-center px-4 py-2 rounded-full">
+        <span className="text-s font-semibold text-gray-800">Project Help</span>
       </div>
       {/* right part */}
       <div>
