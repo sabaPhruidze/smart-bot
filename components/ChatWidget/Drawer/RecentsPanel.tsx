@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
 
 type Session = { id: string; title: string; last_message_at: string };
 type Props = {
@@ -51,9 +52,23 @@ const RecentsPanel = ({
       body: JSON.stringify({ title: "New chat" }),
     });
     const j = await r.json();
-    const id = j?.session?.id as string | undefined;
     await load();
-    if (id) onNew(id);
+    if (j?.session?.id) onNew(j.session.id);
+  };
+
+  const remove = async (id: string) => {
+    const userId = getUserId();
+    if (!userId) return;
+
+    const r = await fetch(`/api/chat/sessions/${id}`, {
+      method: "DELETE",
+      headers: { "x-user-id": userId },
+    });
+    const j = await r.json();
+    if (!j?.ok) return;
+
+    await load();
+    if (activeId === id) await createNew(); // რომ აქტიური სესია არ დაგეკარგოს
   };
 
   useEffect(() => {
@@ -76,20 +91,36 @@ const RecentsPanel = ({
       ) : (
         <div className="space-y-1">
           {items.map((s) => (
-            <button
+            <div
               key={s.id}
-              onClick={() => onSelect(s.id)}
-              className={`w-full text-left rounded-xl px-3 py-2 text-sm cursor-pointer ${
-                activeId === s.id
-                  ? "bg-gray-200/70 text-gray-900"
-                  : "hover:bg-gray-100 text-gray-700"
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 ${
+                activeId === s.id ? "bg-gray-200/70" : "hover:bg-gray-100"
               }`}
             >
-              <div className="font-medium truncate">{s.title}</div>
-              <div className="text-[11px] text-gray-500 truncate">
-                {new Date(s.last_message_at).toLocaleString()}
-              </div>
-            </button>
+              <button
+                onClick={() => onSelect(s.id)}
+                className="flex-1 text-left cursor-pointer"
+              >
+                <div className="text-sm font-medium text-gray-800 truncate">
+                  {s.title}
+                </div>
+                <div className="text-[11px] text-gray-500 truncate">
+                  {new Date(s.last_message_at).toLocaleString()}
+                </div>
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove(s.id);
+                }}
+                aria-label="Delete chat"
+                className="p-2 rounded-full hover:bg-red-50 text-red-600 cursor-pointer"
+                title="Delete"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
           ))}
         </div>
       )}
