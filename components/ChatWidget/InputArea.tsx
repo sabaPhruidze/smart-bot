@@ -34,7 +34,7 @@ const InputArea = ({ onSendMessage }: InputAreaProps) => {
         />
         <button
           aria-label="Send message"
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full text-white bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500 hover:opacity-90 hover:scale-105 transition-all shadow-md cursor-pointer"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full text-white bg-linear-to-r from-pink-500 via-purple-500 to-orange-500 hover:opacity-90 hover:scale-105 transition-all shadow-md cursor-pointer"
           onClick={handleSend}
         >
           <Send size={20} />

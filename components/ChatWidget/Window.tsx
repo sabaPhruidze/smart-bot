@@ -26,7 +26,7 @@ const Window = ({ onClose }: WindowProps) => {
     setMessages((prev) => [...prev, newMessage]);
   };
   return (
-    <div className="relative bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-[400px] sm:h-[600px] sm:rounded-2xl sm:border sm:border-gray-100">
+    <div className="relative bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-100 sm:h-150 sm:rounded-2xl sm:border sm:border-gray-100">
       <Header
         onClose={onClose}
         onToggleDrawer={() => setDrawerOpen((p) => !p)}
@@ -51,7 +51,7 @@ const Window = ({ onClose }: WindowProps) => {
                 }`}
               >
                 {msg.sender === "bot" && (
-                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ">
+                  <div className="w-12 h-12 rounded-full overflow-hidden flex shrink-0">
                     <img
                       src="/icon.png"
                       alt="Bot"
@@ -61,9 +61,9 @@ const Window = ({ onClose }: WindowProps) => {
                 )}
 
                 <div
-                  className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm break-words whitespace-pre-wrap ${
+                  className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm wrap-break-word whitespace-pre-wrap ${
                     msg.sender === "user"
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
+                      ? "bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
                       : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
                   }`}
                 >
@@ -71,7 +71,7 @@ const Window = ({ onClose }: WindowProps) => {
                 </div>
 
                 {msg.sender === "user" && (
-                  <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 border border-blue-200">
+                  <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border border-blue-200">
                     <User size={20} className="text-blue-600" />
                   </div>
                 )}

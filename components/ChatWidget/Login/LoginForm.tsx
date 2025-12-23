@@ -126,7 +126,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-2 w-full rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+        className="mt-2 w-full rounded-full bg-linear-to-r from-pink-500 via-purple-500 to-orange-500 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
       >
         {isSubmitting ? "Signing in…" : "Sign in"}
       </button>

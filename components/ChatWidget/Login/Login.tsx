@@ -10,7 +10,7 @@ type LoginProps = {
 
 export default function Login({ onClose, onSuccess }: LoginProps) {
   return (
-    <div className="bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-[400px] sm:h-[520px] sm:rounded-2xl">
+    <div className="bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-100 sm:h-130 sm:rounded-2xl">
       <LoginHeader onClose={onClose} />
       <LoginForm onSuccess={onSuccess} />
     </div>
