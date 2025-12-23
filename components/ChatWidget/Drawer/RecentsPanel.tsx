@@ -2,62 +2,63 @@
 
 import { useEffect, useState } from "react";
 
-type Session = {
-  id: string;
-  title: string;
-  last_message_at: string;
-};
-
+type Session = { id: string; title: string; last_message_at: string };
 type Props = {
-  activeId?: string | null;
+  open: boolean;
+  refreshKey: number;
+  activeId: string | null;
   onSelect: (id: string) => void;
+  onNew: (id: string) => void;
 };
 
 const getUserId = () => {
   try {
-    const raw = localStorage.getItem("chat_user");
-    const u = raw ? JSON.parse(raw) : null;
+    const u = JSON.parse(localStorage.getItem("chat_user") || "null");
     return typeof u?.id === "string" ? u.id : null;
   } catch {
     return null;
   }
 };
 
-export default function RecentsPanel({ activeId, onSelect }: Props) {
+const RecentsPanel = ({
+  open,
+  refreshKey,
+  activeId,
+  onSelect,
+  onNew,
+}: Props) => {
   const [items, setItems] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const load = async () => {
     const userId = getUserId();
-    if (!userId) return setLoading(false);
-
+    if (!userId) return;
     setLoading(true);
-    const res = await fetch("/api/chat/sessions", {
+    const r = await fetch("/api/chat/sessions", {
       headers: { "x-user-id": userId },
     });
-    const json = await res.json();
-    setItems(json?.sessions ?? []);
+    const j = await r.json();
+    setItems(j?.sessions ?? []);
     setLoading(false);
   };
 
   const createNew = async () => {
     const userId = getUserId();
     if (!userId) return;
-
-    const res = await fetch("/api/chat/sessions", {
+    const r = await fetch("/api/chat/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-user-id": userId },
       body: JSON.stringify({ title: "New chat" }),
     });
-    const json = await res.json();
-    const id = json?.session?.id as string | undefined;
+    const j = await r.json();
+    const id = j?.session?.id as string | undefined;
     await load();
-    if (id) onSelect(id);
+    if (id) onNew(id);
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    if (open) load();
+  }, [open, refreshKey]);
 
   return (
     <div className="space-y-3">
@@ -94,4 +95,5 @@ export default function RecentsPanel({ activeId, onSelect }: Props) {
       )}
     </div>
   );
-}
+};
+export default RecentsPanel;
