@@ -3,6 +3,7 @@ import Header from "./Header";
 import InputArea from "./InputArea";
 import { User } from "lucide-react";
 import Drawer from "./Drawer/Drawer";
+import RecentsPanel from "./Drawer/RecentsPanel";
 
 interface WindowProps {
   onClose: () => void;
@@ -16,6 +17,7 @@ export interface Message {
 const Window = ({ onClose }: WindowProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const handleSendMessage = (text: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -32,10 +34,12 @@ const Window = ({ onClose }: WindowProps) => {
         onToggleDrawer={() => setDrawerOpen((p) => !p)}
       />
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <div className="text-xs text-gray-600">
-          Drawer content will be added in the next steps.
-        </div>
+        <RecentsPanel
+          activeId={activeSessionId}
+          onSelect={setActiveSessionId}
+        />
       </Drawer>
+
       <div className="flex-1 bg-white p-6 overflow-y-auto">
         {messages.length === 0 ? (
           <h2 className="text-2xl font-light text-center text-gray-800 mt-8">
