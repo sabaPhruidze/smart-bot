@@ -38,7 +38,8 @@ const MessagesArea = ({ messages }: { messages: Msg[] }) => {
               )}
 
               <div
-                className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm wrao-break-words whitespace-pre-wrap ${
+                style={{ wordBreak: "break-all", overflowWrap: "anywhere" }}
+                className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm whitespace-pre-wrap ${
                   isUser
                     ? "bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
                     : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"

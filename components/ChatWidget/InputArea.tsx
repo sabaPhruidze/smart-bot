@@ -27,7 +27,7 @@ const InputArea = ({ onSendMessage }: InputAreaProps) => {
         <input
           type="text"
           placeholder="Send your message..."
-          className="w-full py-3.5 px-5 text-md text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all"
+          className="w-full py-3.5 pl-5 pr-15 text-md text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 transition-all"
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
