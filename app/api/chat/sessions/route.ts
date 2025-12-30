@@ -2,14 +2,6 @@ import { neon } from "@neondatabase/serverless";
 
 export const runtime = "nodejs";
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  console.error("❌ Missing DATABASE_URL in environment");
-}
-
-const sql = connectionString ? neon(connectionString) : null;
-
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -24,9 +16,16 @@ function getUserId(req: Request) {
   return null;
 }
 
+function getSql() {
+  const cs = process.env.DATABASE_URL;
+  if (!cs) return null;
+  return neon(cs);
+}
+
 // GET /api/chat/sessions
 export async function GET(req: Request) {
   try {
+    const sql = getSql();
     if (!sql) {
       return Response.json(
         { ok: false, error: "DATABASE_URL is not configured" },
@@ -36,10 +35,7 @@ export async function GET(req: Request) {
 
     const userId = getUserId(req);
     if (!userId) {
-      return Response.json(
-        { ok: false, error: "Missing user id." },
-        { status: 401 }
-      );
+      return Response.json({ ok: false, error: "Missing user id." }, { status: 401 });
     }
 
     const sessions = await sql`
@@ -51,7 +47,7 @@ export async function GET(req: Request) {
     `;
 
     return Response.json({ ok: true, sessions });
-  } catch (err: any) {
+  } catch (err) {
     console.error("GET /api/chat/sessions error:", err);
     return Response.json(
       { ok: false, error: "Server error in GET /chat/sessions" },
@@ -63,6 +59,7 @@ export async function GET(req: Request) {
 // POST /api/chat/sessions
 export async function POST(req: Request) {
   try {
+    const sql = getSql();
     if (!sql) {
       return Response.json(
         { ok: false, error: "DATABASE_URL is not configured" },
@@ -72,15 +69,11 @@ export async function POST(req: Request) {
 
     const userId = getUserId(req);
     if (!userId) {
-      return Response.json(
-        { ok: false, error: "Missing user id." },
-        { status: 401 }
-      );
+      return Response.json({ ok: false, error: "Missing user id." }, { status: 401 });
     }
 
     const body = await req.json().catch(() => ({}));
-    const title =
-      String(body?.title ?? "New chat").trim().slice(0, 60) || "New chat";
+    const title = String(body?.title ?? "New chat").trim().slice(0, 60) || "New chat";
 
     const rows = await sql`
       INSERT INTO chat_sessions (user_id, title)
@@ -89,7 +82,7 @@ export async function POST(req: Request) {
     `;
 
     return Response.json({ ok: true, session: rows[0] });
-  } catch (err: any) {
+  } catch (err) {
     console.error("POST /api/chat/sessions error:", err);
     return Response.json(
       { ok: false, error: "Server error in POST /chat/sessions" },

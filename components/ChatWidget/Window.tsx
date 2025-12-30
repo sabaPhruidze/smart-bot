@@ -50,9 +50,9 @@ const Window = ({
     );
   };
 
-  const newChat = async () => {
+  const newChat = async (): Promise<string | null> => {
     const userId = getUserId();
-    if (!userId) return;
+    if (!userId) return null;
 
     const r = await fetch("/api/chat/sessions", {
       method: "POST",
@@ -62,31 +62,29 @@ const Window = ({
       },
       body: JSON.stringify({ title: "New chat" }),
     });
+
     const j = await r.json();
-    const id = j?.session?.id as string | undefined;
+    const id = (j?.session?.id as string | undefined) ?? null;
 
     setMessages([]);
     if (id) setActiveId(id);
     setRefreshKey((k) => k + 1);
+
+    return id;
   };
 
   const sendMessage = async (text: string) => {
     const userId = getUserId();
     if (!userId) return;
 
-    let sid = activeId;
-    if (!sid) {
-      await newChat();
-      sid = activeId; // შესაძლოა stale იყოს, მაგრამ ლოგიკა შენთან ასეა ახლა
+    // 1) აუცილებლად გვქონდეს sessionId (თუ არ არის — შევქმნათ და სწორედ ის გამოვიყენოთ)
+    let sessionId = activeId;
+    if (!sessionId) {
+      sessionId = await newChat();
     }
-
-    const sessionId =
-      sid ||
-      (JSON.parse(localStorage.getItem("chat_user") || "null")
-        ? activeId
-        : null);
     if (!sessionId) return;
 
+    // 2) გავაგზავნოთ user ტექსტი (backend თვითონ ჩაწერს user-ს და assistant-ს)
     const r = await fetch("/api/chat/messages", {
       method: "POST",
       headers: {
@@ -95,15 +93,22 @@ const Window = ({
       },
       body: JSON.stringify({ sessionId, role: "user", content: text }),
     });
+
     const j = await r.json();
 
-    if (j?.message) {
-      setMessages((p) => [
-        ...p,
-        { id: j.message.id, role: j.message.role, content: j.message.content },
-      ]);
-    }
+    if (!j?.ok) return;
 
+    const u = j?.userMessage;
+    const a = j?.assistantMessage;
+
+    // 3) UI-ში დავამატოთ ორივე მესიჯი
+    setMessages((prev) => [
+      ...prev,
+      ...(u ? [{ id: u.id, role: u.role, content: u.content } as Msg] : []),
+      ...(a ? [{ id: a.id, role: a.role, content: a.content } as Msg] : []),
+    ]);
+
+    // 4) Recents refresh (last_message_at შეიცვალა)
     setRefreshKey((k) => k + 1);
   };
 
@@ -131,7 +136,9 @@ const Window = ({
       <Header
         onClose={onClose}
         onToggleDrawer={() => setDrawerOpen((p) => !p)}
-        onNewChat={newChat}
+        onNewChat={() => {
+          void newChat();
+        }}
         showSignIn={showSignIn}
         onSignIn={onSignIn}
       />
