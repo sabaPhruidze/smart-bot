@@ -1,12 +1,21 @@
-import { Menu, Plus, ChevronDown } from "lucide-react";
+import { Menu, Plus, ChevronDown, LogIn } from "lucide-react";
 
 interface HeaderProps {
   onClose?: () => void;
   onToggleDrawer?: () => void;
   onNewChat?: () => void;
+
+  showSignIn?: boolean;
+  onSignIn?: () => void;
 }
 
-const Header = ({ onClose, onToggleDrawer, onNewChat }: HeaderProps) => {
+const Header = ({
+  onClose,
+  onToggleDrawer,
+  onNewChat,
+  showSignIn,
+  onSignIn,
+}: HeaderProps) => {
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-[#F9FAFB] rounded-t-2xl border-b border-gray-100">
       {/* left part */}
@@ -18,6 +27,7 @@ const Header = ({ onClose, onToggleDrawer, onNewChat }: HeaderProps) => {
         >
           <Menu size={20} />
         </button>
+
         <button
           className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
           onClick={onNewChat}
@@ -25,11 +35,24 @@ const Header = ({ onClose, onToggleDrawer, onNewChat }: HeaderProps) => {
         >
           <Plus size={20} />
         </button>
+
+        {showSignIn && (
+          <button
+            className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
+            onClick={onSignIn}
+            aria-label="Sign in"
+            title="Sign in"
+          >
+            <LogIn size={20} />
+          </button>
+        )}
       </div>
+
       {/* middle part */}
       <div className="flex items-center px-4 py-2 rounded-full">
         <span className="text-s font-semibold text-gray-800">Project Help</span>
       </div>
+
       {/* right part */}
       <div>
         <button

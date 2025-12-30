@@ -6,6 +6,7 @@ import Header from "./Header";
 import InputArea from "./InputArea";
 import MessagesArea from "./MessagesArea";
 import RecentsPanel from "./Drawer/RecentsPanel";
+import { getOrCreateIdentity } from "./chatIdentity";
 
 export type Msg = {
   id: string;
@@ -14,15 +15,18 @@ export type Msg = {
 };
 
 const getUserId = () => {
-  try {
-    const u = JSON.parse(localStorage.getItem("chat_user") || "null");
-    return typeof u?.id === "string" ? u.id : null;
-  } catch {
-    return null;
-  }
+  return getOrCreateIdentity().id;
 };
 
-const Window = ({ onClose }: { onClose: () => void }) => {
+const Window = ({
+  onClose,
+  showSignIn,
+  onSignIn,
+}: {
+  onClose: () => void;
+  showSignIn: boolean;
+  onSignIn: () => void;
+}) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -128,6 +132,8 @@ const Window = ({ onClose }: { onClose: () => void }) => {
         onClose={onClose}
         onToggleDrawer={() => setDrawerOpen((p) => !p)}
         onNewChat={newChat}
+        showSignIn={showSignIn}
+        onSignIn={onSignIn}
       />
 
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>

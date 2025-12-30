@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
+import { getOrCreateIdentity } from "../chatIdentity";
 
 type Session = { id: string; title: string; last_message_at: string };
 
@@ -15,12 +16,7 @@ type Props = {
 };
 
 const getUserId = () => {
-  try {
-    const u = JSON.parse(localStorage.getItem("chat_user") || "null");
-    return typeof u?.id === "string" ? u.id : null;
-  } catch {
-    return null;
-  }
+  return getOrCreateIdentity().id;
 };
 
 const RecentsPanel = ({

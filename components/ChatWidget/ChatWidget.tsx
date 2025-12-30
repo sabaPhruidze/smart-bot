@@ -4,33 +4,45 @@ import { useEffect, useState } from "react";
 import Launcher from "./Launcher";
 import Window from "./Window";
 import Login from "./Login/Login";
+import {
+  getIdentity,
+  getOrCreateIdentity,
+  setAuthedUser,
+} from "./chatIdentity";
 
 type Mode = "closed" | "login" | "chat";
 
 const ChatWidget = () => {
   const [mode, setMode] = useState<Mode>("closed");
-  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+  const [isAuthed, setIsAuthed] = useState(false);
 
   const isOpen = mode !== "closed";
 
+  useEffect(() => {
+    const id = getIdentity();
+    setIsAuthed(id?.kind === "user");
+  }, []);
+
   const handleLauncherClick = () => {
+    // თუ უკვე ავტორიზებულია → პირდაპირ ჩატი
     if (isAuthed) {
       setMode("chat");
-    } else {
-      setMode("login");
+      return;
     }
+    // თუ არა → ჯერ Login გამოჩნდეს
+    setMode("login");
   };
 
-  const handleClose = () => setMode("closed");
+  const handleCloseAll = () => setMode("closed");
 
-  useEffect(() => {
-    const flag = localStorage.getItem("chat_authed");
-    if (flag === "1") setIsAuthed(true);
-  }, []);
+  const handleSkipLogin = () => {
+    // guest identity შეიქმნება/ამოიღება და ჩატი გაიხსნება
+    getOrCreateIdentity();
+    setMode("chat");
+  };
+
   const handleLoginSuccess = (user: { id: string; displayName: string }) => {
-    localStorage.setItem("chat_authed", "1");
-    localStorage.setItem("chat_user", JSON.stringify(user));
-
+    setAuthedUser(user);
     setIsAuthed(true);
     setMode("chat");
   };
@@ -46,10 +58,20 @@ const ChatWidget = () => {
       {mode === "closed" && <Launcher onClick={handleLauncherClick} />}
 
       {mode === "login" && (
-        <Login onClose={handleClose} onSuccess={handleLoginSuccess} />
+        <Login
+          onClose={handleCloseAll}
+          onSuccess={handleLoginSuccess}
+          onSkip={handleSkipLogin}
+        />
       )}
 
-      {mode === "chat" && <Window onClose={handleClose} />}
+      {mode === "chat" && (
+        <Window
+          onClose={handleCloseAll}
+          showSignIn={!isAuthed}
+          onSignIn={() => setMode("login")}
+        />
+      )}
     </div>
   );
 };
