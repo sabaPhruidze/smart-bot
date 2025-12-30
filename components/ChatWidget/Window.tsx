@@ -7,7 +7,7 @@ import InputArea from "./InputArea";
 import MessagesArea from "./MessagesArea";
 import RecentsPanel from "./Drawer/RecentsPanel";
 
-type Msg = {
+export type Msg = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
@@ -31,10 +31,12 @@ const Window = ({ onClose }: { onClose: () => void }) => {
   const loadMessages = async (sessionId: string) => {
     const userId = getUserId();
     if (!userId) return;
+
     const r = await fetch(`/api/chat/sessions/${sessionId}/messages`, {
       headers: { "x-user-id": userId },
     });
     const j = await r.json();
+
     setMessages(
       (j?.messages ?? []).map((m: any) => ({
         id: m.id,
@@ -47,13 +49,18 @@ const Window = ({ onClose }: { onClose: () => void }) => {
   const newChat = async () => {
     const userId = getUserId();
     if (!userId) return;
+
     const r = await fetch("/api/chat/sessions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-user-id": userId },
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": userId,
+      },
       body: JSON.stringify({ title: "New chat" }),
     });
     const j = await r.json();
     const id = j?.session?.id as string | undefined;
+
     setMessages([]);
     if (id) setActiveId(id);
     setRefreshKey((k) => k + 1);
@@ -66,7 +73,7 @@ const Window = ({ onClose }: { onClose: () => void }) => {
     let sid = activeId;
     if (!sid) {
       await newChat();
-      sid = activeId; // UI-მ ჯერ შეიძლება არ განაახლოს; fallback ქვემოთ
+      sid = activeId; // შესაძლოა stale იყოს, მაგრამ ლოგიკა შენთან ასეა ახლა
     }
 
     const sessionId =
@@ -78,21 +85,42 @@ const Window = ({ onClose }: { onClose: () => void }) => {
 
     const r = await fetch("/api/chat/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-user-id": userId },
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": userId,
+      },
       body: JSON.stringify({ sessionId, role: "user", content: text }),
     });
     const j = await r.json();
-    if (j?.message)
+
+    if (j?.message) {
       setMessages((p) => [
         ...p,
         { id: j.message.id, role: j.message.role, content: j.message.content },
       ]);
+    }
+
     setRefreshKey((k) => k + 1);
   };
 
   useEffect(() => {
     if (activeId) loadMessages(activeId);
   }, [activeId]);
+
+  // აქ ვმართავთ active ჩატის შეცვლას წაშლისას
+  const handleSessionDelete = (
+    deletedId: string,
+    fallbackId: string | null
+  ) => {
+    setActiveId((current) => {
+      if (current === deletedId) return fallbackId;
+      return current;
+    });
+
+    if (!fallbackId) {
+      setMessages([]);
+    }
+  };
 
   return (
     <div className="relative bg-white shadow-2xl flex flex-col border border-gray-100 overflow-hidden w-full h-full rounded-none sm:w-100 sm:h-150 sm:rounded-2xl sm:border sm:border-gray-100">
@@ -116,6 +144,7 @@ const Window = ({ onClose }: { onClose: () => void }) => {
             setMessages([]);
             setDrawerOpen(false);
           }}
+          onDelete={handleSessionDelete}
         />
       </Drawer>
 
@@ -124,4 +153,5 @@ const Window = ({ onClose }: { onClose: () => void }) => {
     </div>
   );
 };
+
 export default Window;

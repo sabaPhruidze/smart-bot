@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 
 type Session = { id: string; title: string; last_message_at: string };
+
 type Props = {
   open: boolean;
   refreshKey: number;
   activeId: string | null;
   onSelect: (id: string) => void;
   onNew: (id: string) => void;
+  onDelete: (deletedId: string, fallbackId: string | null) => void;
 };
 
 const getUserId = () => {
@@ -27,6 +29,7 @@ const RecentsPanel = ({
   activeId,
   onSelect,
   onNew,
+  onDelete,
 }: Props) => {
   const [items, setItems] = useState<Session[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,6 +37,7 @@ const RecentsPanel = ({
   const load = async () => {
     const userId = getUserId();
     if (!userId) return;
+
     setLoading(true);
     const r = await fetch("/api/chat/sessions", {
       headers: { "x-user-id": userId },
@@ -46,12 +50,17 @@ const RecentsPanel = ({
   const createNew = async () => {
     const userId = getUserId();
     if (!userId) return;
+
     const r = await fetch("/api/chat/sessions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-user-id": userId },
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": userId,
+      },
       body: JSON.stringify({ title: "New chat" }),
     });
     const j = await r.json();
+
     await load();
     if (j?.session?.id) onNew(j.session.id);
   };
@@ -67,8 +76,22 @@ const RecentsPanel = ({
     const j = await r.json();
     if (!j?.ok) return;
 
-    await load();
-    if (activeId === id) await createNew(); // რომ აქტიური სესია არ დაგეკარგოს
+    // 1) ავიღოთ მიმდინარე items სნეპშოტი
+    const current = items;
+    const idx = current.findIndex((s) => s.id === id);
+    if (idx === -1) return;
+
+    // 2) გავფილტროთ წაშლილი ჩატი
+    const next = current.filter((s) => s.id !== id);
+
+    // 3) ვიპოვოთ fallback ჩატი: ჯერ წინა, თუ არაა – პირველი, თუ არც – null
+    const fallback = next[idx - 1] ?? next[0] ?? null;
+
+    // 4) ლოკალურად განვაახლოთ სია
+    setItems(next);
+
+    // 5) მშობელს ვეტყვით: რომელი წავშალეთ და რომელზე უნდა გადავიდეს
+    onDelete(id, fallback ? fallback.id : null);
   };
 
   useEffect(() => {
@@ -127,4 +150,5 @@ const RecentsPanel = ({
     </div>
   );
 };
+
 export default RecentsPanel;
