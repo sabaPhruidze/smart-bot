@@ -16,22 +16,20 @@ const ChatWidget = () => {
   const [mode, setMode] = useState<Mode>("closed");
   const [isAuthed, setIsAuthed] = useState(false);
 
+  const handleLauncherClick = () => {
+    if (isAuthed) {
+      setMode("chat");
+      return;
+    }
+    getOrCreateIdentity();
+    setMode("login");
+  };
   const isOpen = mode !== "closed";
 
   useEffect(() => {
     const id = getIdentity();
     setIsAuthed(id?.kind === "user");
   }, []);
-
-  const handleLauncherClick = () => {
-    // თუ უკვე ავტორიზებულია → პირდაპირ ჩატი
-    if (isAuthed) {
-      setMode("chat");
-      return;
-    }
-    // თუ არა → ჯერ Login გამოჩნდეს
-    setMode("login");
-  };
 
   const handleCloseAll = () => setMode("closed");
 

@@ -1,10 +1,27 @@
 import { User } from "lucide-react";
-
+import { motion } from "framer-motion";
 export type Msg = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
+  status?: "sending" | "typing";
 };
+
+const TypingDots = () => {
+  return (
+    <div className="flex items-center gap-1">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="w-2 h-2 rounded-full bg-gray-400"
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+        />
+      ))}
+    </div>
+  );
+};
+
 const MessagesArea = ({ messages }: { messages: Msg[] }) => {
   if (messages.length === 0) {
     return (
@@ -45,7 +62,7 @@ const MessagesArea = ({ messages }: { messages: Msg[] }) => {
                     : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
                 }`}
               >
-                {m.content}
+                {m.status === "typing" ? <TypingDots /> : m.content}
               </div>
 
               {isUser && (

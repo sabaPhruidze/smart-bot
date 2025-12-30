@@ -77,39 +77,77 @@ const Window = ({
     const userId = getUserId();
     if (!userId) return;
 
-    // 1) აუცილებლად გვქონდეს sessionId (თუ არ არის — შევქმნათ და სწორედ ის გამოვიყენოთ)
+    // 1) sessionId აუცილებლად გვქონდეს
     let sessionId = activeId;
-    if (!sessionId) {
-      sessionId = await newChat();
-    }
+    if (!sessionId) sessionId = await newChat();
     if (!sessionId) return;
 
-    // 2) გავაგზავნოთ user ტექსტი (backend თვითონ ჩაწერს user-ს და assistant-ს)
-    const r = await fetch("/api/chat/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-user-id": userId,
-      },
-      body: JSON.stringify({ sessionId, role: "user", content: text }),
-    });
+    // 2) optimistic UI (დაუყოვნებლივ)
+    const tmpUserId = `tmp-u-${Date.now()}`;
+    const tmpBotId = `tmp-a-${Date.now()}`;
 
-    const j = await r.json();
-
-    if (!j?.ok) return;
-
-    const u = j?.userMessage;
-    const a = j?.assistantMessage;
-
-    // 3) UI-ში დავამატოთ ორივე მესიჯი
     setMessages((prev) => [
       ...prev,
-      ...(u ? [{ id: u.id, role: u.role, content: u.content } as Msg] : []),
-      ...(a ? [{ id: a.id, role: a.role, content: a.content } as Msg] : []),
+      { id: tmpUserId, role: "user", content: text, status: "sending" },
+      { id: tmpBotId, role: "assistant", content: "", status: "typing" },
     ]);
 
-    // 4) Recents refresh (last_message_at შეიცვალა)
-    setRefreshKey((k) => k + 1);
+    try {
+      const r = await fetch("/api/chat/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": userId,
+        },
+        body: JSON.stringify({ sessionId, role: "user", content: text }),
+      });
+
+      const j = await r.json();
+
+      if (!j?.ok) {
+        // typing-ს შეცვლა error მესიჯით
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tmpBotId
+              ? {
+                  ...m,
+                  status: undefined,
+                  content: j?.error || "Server error. Please try again.",
+                }
+              : m
+          )
+        );
+        return;
+      }
+
+      const u = j.userMessage;
+      const a = j.assistantMessage;
+
+      // 3) რეალური მესიჯებით ჩანაცვლება
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id === tmpUserId)
+            return { id: u.id, role: u.role, content: u.content };
+          if (m.id === tmpBotId)
+            return { id: a.id, role: a.role, content: a.content };
+          return m;
+        })
+      );
+
+      setRefreshKey((k) => k + 1);
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === tmpBotId
+            ? {
+                ...m,
+                status: undefined,
+                content: "Network error. Please try again.",
+              }
+            : m
+        )
+      );
+    }
   };
 
   useEffect(() => {
