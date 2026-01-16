@@ -55,8 +55,8 @@ const MessagesArea = ({ messages }: { messages: Msg[] }) => {
               )}
 
               <div
-                style={{ wordBreak: "break-all", overflowWrap: "anywhere" }}
-                className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm whitespace-pre-wrap ${
+                style={{ overflowWrap: "break-word", wordBreak: "normal" }}
+                className={`p-3 rounded-2xl max-w-[70%] text-sm shadow-sm whitespace-pre-wrap break-words ${
                   isUser
                     ? "bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-br-none"
                     : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
