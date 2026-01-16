@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Drawer from "./Drawer/Drawer";
 import Header from "./Header";
 import InputArea from "./InputArea";
@@ -12,6 +11,7 @@ export type Msg = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
+  status?: "sending" | "typing";
 };
 
 const getUserId = () => {
@@ -31,7 +31,7 @@ const Window = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
-
+  const skipNextLoadRef = useRef(false);
   const loadMessages = async (sessionId: string) => {
     const userId = getUserId();
     if (!userId) return;
@@ -67,7 +67,10 @@ const Window = ({
     const id = (j?.session?.id as string | undefined) ?? null;
 
     setMessages([]);
-    if (id) setActiveId(id);
+    if (id) {
+      skipNextLoadRef.current = true; // <-- ეს ხაზი დაამატე
+      setActiveId(id);
+    }
     setRefreshKey((k) => k + 1);
 
     return id;
@@ -151,7 +154,13 @@ const Window = ({
   };
 
   useEffect(() => {
-    if (activeId) loadMessages(activeId);
+    if (!activeId) return;
+    if (skipNextLoadRef.current) {
+      skipNextLoadRef.current = false;
+      return;
+    }
+
+    void loadMessages(activeId);
   }, [activeId]);
 
   // აქ ვმართავთ active ჩატის შეცვლას წაშლისას
