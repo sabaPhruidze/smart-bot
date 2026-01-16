@@ -128,13 +128,7 @@ export async function POST(req: Request) {
       - Be warm, professional, and encouraging (not robotic).
       - If the user types awkwardly (numbers, typos, fragments), respond smoothly without calling it out.
       - Avoid repeating the same closing sentence; rephrase.
-
-      READABILITY (avoid ugly word breaks):
-      - Prefer short sentences and short phrases.
-      - Avoid long unbroken strings and long compound words.
-      - If a phrase risks breaking awkwardly, rewrite it (shorter synonym) or add a hyphen (e.g., “request-a-quote”, “send-a-file”) so it wraps cleanly.
-      - Use blank lines between sections when helpful.
-
+      
       FIRST MESSAGE (mandatory):
       - Greet.
       - Say we provide print, signs, and marketing materials.
