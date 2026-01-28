@@ -107,10 +107,11 @@ export default function VoiceWindow({ onClose }: Props) {
         const evt = {
           type: "session.update",
           session: {
-            output_modalities: ["audio"],
+            modalities: ["text", "audio"],
+            output_modalities: ["text", "audio"],
             voice: "alloy",
             instructions:
-              "Speak in Georgian clearly and simply. Be concise and direct.",
+              "You are a helpful assistant. Speak in Georgian clearly and simply. Be concise and direct. Always respond with speech.",
           },
         };
 
@@ -174,7 +175,7 @@ export default function VoiceWindow({ onClose }: Props) {
   const isConnected = status === "connected";
 
   return (
-    <div className="w-full sm:w-[380px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-black/10">
+    <div className="w-full sm:w-95 bg-white rounded-2xl shadow-2xl overflow-hidden border border-black/10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-black/10">
         <div className="font-semibold text-black">Voice</div>
         <button
@@ -192,7 +193,7 @@ export default function VoiceWindow({ onClose }: Props) {
 
       <div className="p-4 space-y-3">
         {/* ✅ Keep audio element in DOM */}
-        <audio ref={audioRef} autoPlay className="hidden" />
+        <audio ref={audioRef} autoPlay playsInline className="hidden" />
 
         <div className="text-sm text-black/70">
           Status:{" "}
@@ -204,7 +205,7 @@ export default function VoiceWindow({ onClose }: Props) {
           </span>
         </div>
 
-        {err && <div className="text-sm text-red-600 break-words">{err}</div>}
+        {err && <div className="text-sm text-red-600 wrap-break-words">{err}</div>}
 
         <div className="flex gap-2">
           {!isConnected ? (
