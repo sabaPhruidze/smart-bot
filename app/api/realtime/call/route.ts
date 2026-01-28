@@ -42,12 +42,12 @@ export async function POST(req: Request) {
   const fd = new FormData();
   fd.append("sdp", body.sdp);
 
-  // ✅ minimal session: do NOT send voice here (your error was session.voice)
+  // ✅ Updated to GA API structure
   fd.append(
     "session",
     JSON.stringify({
       type: "realtime",
-      model: "gpt-4o-realtime-preview",
+      model: "gpt-realtime",
     })
   );
 
