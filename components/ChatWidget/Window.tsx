@@ -1,10 +1,12 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+
+import { useState, useRef } from "react";
 import Drawer from "./Drawer/Drawer";
 import Header from "./Header";
 import InputArea from "./InputArea";
 import MessagesArea from "./MessagesArea";
 import RecentsPanel from "./Drawer/RecentsPanel";
+import VoiceWindow from "./VoiceWindow";
 import { getOrCreateIdentity } from "./chatIdentity";
 
 export type Msg = {
@@ -31,7 +33,12 @@ const Window = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const [voiceOpen, setVoiceOpen] = useState(false);
+
+  // keep if you still want to avoid an extra load right after creating chat
   const skipNextLoadRef = useRef(false);
+
   const loadMessages = async (sessionId: string) => {
     const userId = getUserId();
     if (!userId) return;
@@ -68,7 +75,7 @@ const Window = ({
 
     setMessages([]);
     if (id) {
-      skipNextLoadRef.current = true; // <-- ეს ხაზი დაამატე
+      skipNextLoadRef.current = true;
       setActiveId(id);
     }
     setRefreshKey((k) => k + 1);
@@ -80,12 +87,10 @@ const Window = ({
     const userId = getUserId();
     if (!userId) return;
 
-    // 1) sessionId აუცილებლად გვქონდეს
     let sessionId = activeId;
     if (!sessionId) sessionId = await newChat();
     if (!sessionId) return;
 
-    // 2) optimistic UI (დაუყოვნებლივ)
     const tmpUserId = `tmp-u-${Date.now()}`;
     const tmpBotId = `tmp-a-${Date.now()}`;
 
@@ -108,7 +113,6 @@ const Window = ({
       const j = await r.json();
 
       if (!j?.ok) {
-        // typing-ს შეცვლა error მესიჯით
         setMessages((prev) =>
           prev.map((m) =>
             m.id === tmpBotId
@@ -126,13 +130,10 @@ const Window = ({
       const u = j.userMessage;
       const a = j.assistantMessage;
 
-      // 3) რეალური მესიჯებით ჩანაცვლება
       setMessages((prev) =>
         prev.map((m) => {
-          if (m.id === tmpUserId)
-            return { id: u.id, role: u.role, content: u.content };
-          if (m.id === tmpBotId)
-            return { id: a.id, role: a.role, content: a.content };
+          if (m.id === tmpUserId) return { id: u.id, role: u.role, content: u.content };
+          if (m.id === tmpBotId) return { id: a.id, role: a.role, content: a.content };
           return m;
         })
       );
@@ -153,21 +154,7 @@ const Window = ({
     }
   };
 
-  useEffect(() => {
-    if (!activeId) return;
-    if (skipNextLoadRef.current) {
-      skipNextLoadRef.current = false;
-      return;
-    }
-
-    void loadMessages(activeId);
-  }, [activeId]);
-
-  // აქ ვმართავთ active ჩატის შეცვლას წაშლისას
-  const handleSessionDelete = (
-    deletedId: string,
-    fallbackId: string | null
-  ) => {
+  const handleSessionDelete = (deletedId: string, fallbackId: string | null) => {
     setActiveId((current) => {
       if (current === deletedId) return fallbackId;
       return current;
@@ -175,6 +162,9 @@ const Window = ({
 
     if (!fallbackId) {
       setMessages([]);
+    } else {
+      // ✅ load messages for fallback without useEffect
+      void loadMessages(fallbackId);
     }
   };
 
@@ -196,7 +186,11 @@ const Window = ({
           refreshKey={refreshKey}
           activeId={activeId}
           onSelect={(id) => {
+            // ✅ load here (no effect)
             setActiveId(id);
+            skipNextLoadRef.current = false;
+            void loadMessages(id);
+
             setDrawerOpen(false);
           }}
           onNew={(id) => {
@@ -209,7 +203,14 @@ const Window = ({
       </Drawer>
 
       <MessagesArea messages={messages} />
-      <InputArea onSendMessage={sendMessage} />
+
+      {voiceOpen && (
+        <div className="absolute inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4">
+          <VoiceWindow onClose={() => setVoiceOpen(false)} />
+        </div>
+      )}
+
+      <InputArea onSendMessage={sendMessage} onVoiceClick={() => setVoiceOpen(true)} />
     </div>
   );
 };

@@ -7,6 +7,9 @@ export type ChatIdentity = {
 };
 
 const STORAGE_KEY = "chat_user";
+function hasLocalStorage(): boolean {
+  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+}
 
 // UUID v4 fallback (თუ crypto.randomUUID არ არის ხელმისაწვდომი)
 function uuidv4Fallback() {
@@ -37,7 +40,21 @@ function safeParse(raw: string | null): ChatIdentity | null {
  * IMPORTANT: ეს უნდა გამოიძახო მხოლოდ client-side (use client გარემოში).
  */
 export function getOrCreateIdentity(): ChatIdentity {
-  const existing = safeParse(localStorage.getItem(STORAGE_KEY));
+  // ✅ SSR დაცვა
+  if (!hasLocalStorage()) {
+    const id =
+      (globalThis.crypto as any)?.randomUUID?.() ??
+      uuidv4Fallback();
+
+    const suffix = id.split("-")[0]?.toUpperCase() || "GUEST";
+    return {
+      id,
+      displayName: `Guest ${suffix}`,
+      kind: "guest",
+    };
+  }
+
+  const existing = safeParse(window.localStorage.getItem(STORAGE_KEY));
   if (existing) return existing;
 
   const id =
@@ -51,17 +68,17 @@ export function getOrCreateIdentity(): ChatIdentity {
     kind: "guest",
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
   return identity;
 }
 
-/** როცა რეალურად ლოგინდება, guest-ს “გაანახლებს” user-ად */
 export function setAuthedUser(user: { id: string; displayName: string }) {
+  if (!hasLocalStorage()) return; 
   const identity: ChatIdentity = { ...user, kind: "user" };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
 }
 
-/** სურვილისამებრ: გაიგო ვინ არის (guest/user) */
 export function getIdentity(): ChatIdentity | null {
-  return safeParse(localStorage.getItem(STORAGE_KEY));
+  if (!hasLocalStorage()) return null;
+  return safeParse(window.localStorage.getItem(STORAGE_KEY));
 }

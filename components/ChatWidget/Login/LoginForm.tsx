@@ -20,7 +20,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setValue, // for identifier
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
-
+  const handleRegisterClick = () => {
+    window.open("https://www.mseprinting.com/register", "_blank", "noopener,noreferrer");
+  };
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
 
@@ -129,6 +131,13 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         className="mt-2 w-full rounded-full bg-linear-to-r from-pink-500 via-purple-500 to-orange-500 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
       >
         {isSubmitting ? "Signing in…" : "Sign in"}
+      </button>
+       <button
+        type="button"
+        onClick={handleRegisterClick}
+        className="w-full rounded-full bg-linear-to-r from-pink-500 via-purple-500 to-orange-500 py-3 font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
+      >
+        Register
       </button>
     </form>
   );

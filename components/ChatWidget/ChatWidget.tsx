@@ -1,41 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Launcher from "./Launcher";
 import Window from "./Window";
 import Login from "./Login/Login";
-import {
-  getIdentity,
-  getOrCreateIdentity,
-  setAuthedUser,
-} from "./chatIdentity";
+import { getIdentity, getOrCreateIdentity, setAuthedUser } from "./chatIdentity";
 
 type Mode = "closed" | "login" | "chat";
 
 const ChatWidget = () => {
+  // ✅ mount-ზე ერთხელ ვკითხულობთ. useEffect აღარ არის → error გაქრება
+  const [isAuthed, setIsAuthed] = useState(() => {
+    const id = getIdentity(); // getIdentity უკვე SSR-safe გაქვს
+    return id?.kind === "user";
+  });
+
   const [mode, setMode] = useState<Mode>("closed");
-  const [isAuthed, setIsAuthed] = useState(false);
+
+  const isOpen = mode !== "closed";
+  const handleCloseAll = () => setMode("closed");
 
   const handleLauncherClick = () => {
-    if (isAuthed) {
+    const id = getIdentity();
+
+    if (id?.kind === "user") {
+      setIsAuthed(true);
       setMode("chat");
       return;
     }
-    getOrCreateIdentity();
+
+    getOrCreateIdentity(); // guest ან არსებული
+    setIsAuthed(false);
     setMode("login");
   };
-  const isOpen = mode !== "closed";
-
-  useEffect(() => {
-    const id = getIdentity();
-    setIsAuthed(id?.kind === "user");
-  }, []);
-
-  const handleCloseAll = () => setMode("closed");
 
   const handleSkipLogin = () => {
-    // guest identity შეიქმნება/ამოიღება და ჩატი გაიხსნება
     getOrCreateIdentity();
+    setIsAuthed(false);
     setMode("chat");
   };
 
